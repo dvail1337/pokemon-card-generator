@@ -1,5 +1,5 @@
 <script>
-    const pokemonCard = {
+    let pokemonCard = {
         name: "",
         type: "",
         hpValue: "",
@@ -19,12 +19,42 @@
         retreatCost: "",
         funFact: "",
         lv: "",
+        src: "",
     };
 
     const fire = "./fire.png";
     const water = "./water.png";
     const grass = "./grass.png";
     const ice = "./ice.png";
+
+    function fileChanged(event) {
+        const input = event.target;
+
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                pokemonCard.src = e.target.result;
+            };
+
+            reader.readAsDataURL(file);
+        }
+    }
+
+    const SAVE_KEY = "save-key";
+
+    function save() {
+        const stringified = JSON.stringify(pokemonCard);
+        localStorage.setItem(SAVE_KEY, stringified);
+    }
+    function load() {
+        const stringified = localStorage.getItem(SAVE_KEY);
+        if (stringified) {
+            pokemonCard = JSON.parse(stringified);
+        } else return;
+    }
+    load();
 </script>
 
 <div class="container">
@@ -36,12 +66,9 @@
             alt="A blank Pokemon card."
         />
         <div class="input-values">
-            <img
-                src="./{pokemonCard.image}"
-                class="image"
-                id="image"
-                alt="wtf"
-            />
+            {#if pokemonCard.src}
+                <img id="image" src={pokemonCard.src} alt="preview" />
+            {/if}
             <div id="name">{pokemonCard.name}</div>
             <img src={pokemonCard.type} alt="" id="type" />
             <div id="hp">{pokemonCard.hpValue} HP</div>
@@ -81,9 +108,10 @@
         <label for="image">Image URL:</label>
         <input
             id="img-upload"
-            name="image"
             type="file"
+            accept="image/png, image/jpeg"
             bind:value={pokemonCard.image}
+            on:change={fileChanged}
         />
 
         <label for="name">Name:</label>
@@ -222,6 +250,8 @@
 
         <label for="lv">Level:</label>
         <input type="text" bind:value={pokemonCard.lv} placeholder="Level" />
+
+        <button on:click={save}>Save</button>
     </form>
 </div>
 
@@ -263,9 +293,6 @@
     textarea {
         min-height: 100px;
     }
-    #img-upload {
-        min-height: 38px;
-    }
     #name {
         font-family: Calibri Condensed;
         font-weight: bold;
@@ -276,7 +303,7 @@
     }
     #hp {
         font-family: Calibri Condensed;
-        color: red;
+        color: rgb(225, 0, 0);
         font-size: 30px;
         position: absolute;
         top: 30px;
@@ -284,10 +311,10 @@
     }
     #image {
         position: absolute;
-        top: 75px;
-        left: 51px;
-        max-width: 325px;
-        max-height: 231px;
+        top: 74px;
+        left: 49px;
+        width: 325px;
+        height: 232px;
     }
     #species {
         font-family: Calibri;
@@ -423,5 +450,8 @@
         max-width: 28px;
         top: 31px;
         left: 355px;
+    }
+    #img-upload {
+        min-height: 38px;
     }
 </style>
